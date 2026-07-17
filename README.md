@@ -124,3 +124,4 @@ Currency is set to TZS in `lib/utils/formatters.dart`. Change
 # invoice
 # invoice
 # invoice
+# Invoice-generator
