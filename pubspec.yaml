@@ -1,0 +1,39 @@
+name: sj_tracking_solution
+description: "SJ TRACKING SOLUTION - Invoice Manager with multiple invoice templates"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # State management
+  provider: ^6.1.2
+
+  # Local persistence (stores invoices as JSON on-device)
+  shared_preferences: ^2.2.3
+
+  # PDF generation & printing/sharing
+  pdf: ^3.11.1
+  printing: ^5.13.2
+
+  # Formatting dates & currency
+  intl: ^0.19.0
+
+  # Unique IDs for invoices/items
+  uuid: ^4.4.0
+
+  # Company logo upload (gallery/camera picker)
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
