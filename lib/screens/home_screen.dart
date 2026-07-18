@@ -5,6 +5,7 @@ import '../models/invoice.dart';
 import '../providers/invoice_provider.dart';
 import '../utils/formatters.dart';
 import '../utils/month_utils.dart';
+import 'ai_accountant_screen.dart';
 import 'company_profile_screen.dart';
 import 'invoice_form_screen.dart';
 import 'invoice_preview_screen.dart';
@@ -42,6 +43,13 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('SJ TRACKING SOLUTION'),
         centerTitle: false,
         actions: [
+          IconButton(
+            tooltip: 'AI Accountant',
+            icon: const Icon(Icons.auto_awesome),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const AiAccountantScreen()),
+            ),
+          ),
           IconButton(
             tooltip: 'Receipts',
             icon: const Icon(Icons.receipt),

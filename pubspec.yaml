@@ -30,6 +30,9 @@ dependencies:
   # Company logo upload (gallery/camera picker)
   image_picker: ^1.1.2
 
+  # HTTP calls for the AI Accountant (Anthropic API)
+  http: ^1.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

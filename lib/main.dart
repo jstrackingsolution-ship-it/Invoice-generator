@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'providers/ai_settings_provider.dart';
 import 'providers/company_profile_provider.dart';
 import 'providers/invoice_provider.dart';
 import 'providers/receipt_provider.dart';
@@ -22,6 +23,7 @@ class SjTrackingSolutionApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => CompanyProfileProvider()),
         ChangeNotifierProvider(create: (_) => ReceiptProvider()),
+        ChangeNotifierProvider(create: (_) => AiSettingsProvider()),
       ],
       child: MaterialApp(
         title: 'SJ TRACKING SOLUTION',
