@@ -6,6 +6,7 @@ import 'package:pdf/widgets.dart' as pw;
 import '../models/invoice.dart';
 import '../models/receipt.dart';
 import 'formatters.dart';
+import 'number_to_words.dart';
 
 /// Builds a ready-to-print/share PDF for an [Invoice] in the chosen
 /// [InvoiceTemplate] style. Each template has a distinct look but is fed
@@ -13,19 +14,20 @@ import 'formatters.dart';
 class InvoicePdfGenerator {
   static Future<Uint8List> generate(
     Invoice invoice,
-    InvoiceTemplate template,
-  ) async {
+    InvoiceTemplate template, {
+    bool showAmountInWords = true,
+  }) async {
     final doc = pw.Document();
 
     switch (template) {
       case InvoiceTemplate.classic:
-        _buildClassic(doc, invoice);
+        _buildClassic(doc, invoice, showAmountInWords);
         break;
       case InvoiceTemplate.modern:
-        _buildModern(doc, invoice);
+        _buildModern(doc, invoice, showAmountInWords);
         break;
       case InvoiceTemplate.minimal:
-        _buildMinimal(doc, invoice);
+        _buildMinimal(doc, invoice, showAmountInWords);
         break;
     }
 
@@ -33,7 +35,10 @@ class InvoicePdfGenerator {
   }
 
   /// Builds a clean payment receipt PDF for a [Receipt], stamped PAID.
-  static Future<Uint8List> generateReceipt(Receipt receipt) async {
+  static Future<Uint8List> generateReceipt(
+    Receipt receipt, {
+    bool showAmountInWords = true,
+  }) async {
     final doc = pw.Document();
     const accent = PdfColor.fromInt(0xFF1B8A5A); // green, distinct from invoice accent
     final baseFont = pw.Font.helvetica();
@@ -53,8 +58,16 @@ class InvoicePdfGenerator {
               children: [
                 pw.Row(children: [
                   if (logo != null) ...[logo, pw.SizedBox(width: 10)],
-                  pw.Text(receipt.companyName,
-                      style: pw.TextStyle(font: boldFont, fontSize: 18)),
+                  pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Text(receipt.companyName,
+                          style: pw.TextStyle(font: boldFont, fontSize: 18)),
+                      if (receipt.companyTin != null && receipt.companyTin!.isNotEmpty)
+                        pw.Text('TIN: ${receipt.companyTin}',
+                            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                    ],
+                  ),
                 ]),
                 pw.Container(
                   padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -122,6 +135,12 @@ class InvoicePdfGenerator {
                 ],
               ),
             ),
+            if (showAmountInWords) ...[
+              pw.SizedBox(height: 10),
+              pw.Center(
+                child: amountInWordsLine(receipt.amountPaid, boldFont, baseFont),
+              ),
+            ],
             pw.SizedBox(height: 30),
             pw.Text(
               'This receipt confirms that the above payment has been received in full.',
@@ -141,7 +160,7 @@ class InvoicePdfGenerator {
   // ---------------------------------------------------------------------
   // CLASSIC — traditional serif layout, bordered table, formal tone
   // ---------------------------------------------------------------------
-  static void _buildClassic(pw.Document doc, Invoice invoice) {
+  static void _buildClassic(pw.Document doc, Invoice invoice, bool showAmountInWords) {
     final baseFont = pw.Font.times();
     final boldFont = pw.Font.timesBold();
     final border = pw.BoxDecoration(
@@ -197,6 +216,8 @@ class InvoicePdfGenerator {
                       pw.Text(invoice.companyEmail),
                     if (invoice.companyPhone.isNotEmpty)
                       pw.Text(invoice.companyPhone),
+                    if (invoice.companyTin.isNotEmpty)
+                      pw.Text('TIN: ${invoice.companyTin}'),
                   ],
                 ),
               ),
@@ -290,6 +311,12 @@ class InvoicePdfGenerator {
               ),
             ],
           ),
+          if (showAmountInWords)
+            pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: pw.SizedBox(
+                  width: 220, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
+            ),
           if (invoice.notes.isNotEmpty) ...[
             pw.SizedBox(height: 24),
             pw.Text('Notes', style: pw.TextStyle(font: boldFont, fontSize: 11)),
@@ -308,7 +335,7 @@ class InvoicePdfGenerator {
   // ---------------------------------------------------------------------
   // MODERN — bold color header band, clean sans-serif, accent totals
   // ---------------------------------------------------------------------
-  static void _buildModern(pw.Document doc, Invoice invoice) {
+  static void _buildModern(pw.Document doc, Invoice invoice, bool showAmountInWords) {
     const accent = PdfColor.fromInt(0xFF2F6FED); // blue accent
     final baseFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
@@ -350,6 +377,9 @@ class InvoicePdfGenerator {
                             style: const pw.TextStyle(color: PdfColors.white, fontSize: 9)),
                       if (invoice.companyEmail.isNotEmpty)
                         pw.Text(invoice.companyEmail,
+                            style: const pw.TextStyle(color: PdfColors.white, fontSize: 9)),
+                      if (invoice.companyTin.isNotEmpty)
+                        pw.Text('TIN: ${invoice.companyTin}',
                             style: const pw.TextStyle(color: PdfColors.white, fontSize: 9)),
                     ],
                   ),
@@ -478,6 +508,12 @@ class InvoicePdfGenerator {
                     ),
                   ],
                 ),
+                if (showAmountInWords)
+                  pw.Align(
+                    alignment: pw.Alignment.centerRight,
+                    child: pw.SizedBox(
+                        width: 230, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
+                  ),
                 if (invoice.notes.isNotEmpty) ...[
                   pw.SizedBox(height: 20),
                   pw.Text('NOTES', style: pw.TextStyle(font: boldFont, fontSize: 9, color: accent)),
@@ -494,7 +530,7 @@ class InvoicePdfGenerator {
   // ---------------------------------------------------------------------
   // MINIMAL — lots of whitespace, thin rules, no boxes, understated
   // ---------------------------------------------------------------------
-  static void _buildMinimal(pw.Document doc, Invoice invoice) {
+  static void _buildMinimal(pw.Document doc, Invoice invoice, bool showAmountInWords) {
     final baseFont = pw.Font.helvetica();
     final boldFont = pw.Font.helveticaBold();
    final line = pw.Divider(
@@ -518,6 +554,12 @@ class InvoicePdfGenerator {
                   style: pw.TextStyle(font: boldFont, fontSize: 12, letterSpacing: 1.5)),
             ],
           ),
+          if (invoice.companyTin.isNotEmpty)
+            pw.Padding(
+              padding: const pw.EdgeInsets.only(top: 4),
+              child: pw.Text('TIN: ${invoice.companyTin}',
+                  style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+            ),
           pw.SizedBox(height: 30),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -649,6 +691,12 @@ class InvoicePdfGenerator {
               ),
             ],
           ),
+          if (showAmountInWords)
+            pw.Align(
+              alignment: pw.Alignment.centerRight,
+              child: pw.SizedBox(
+                  width: 200, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
+            ),
           if (invoice.notes.isNotEmpty) ...[
             pw.SizedBox(height: 28),
             pw.Text('NOTES',
@@ -664,6 +712,23 @@ class InvoicePdfGenerator {
   // ---------------------------------------------------------------------
   // Logo + GPS Service Charge helpers (shared across templates)
   // ---------------------------------------------------------------------
+  static pw.Widget amountInWordsLine(double amount, pw.Font boldFont, pw.Font baseFont) {
+    final words = amountInWords(amount, currencySymbol: Formatters.currencySymbol);
+    return pw.Container(
+      margin: const pw.EdgeInsets.only(top: 8),
+      child: pw.RichText(
+        text: pw.TextSpan(children: [
+          pw.TextSpan(
+              text: 'Amount in words: ',
+              style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.grey700)),
+          pw.TextSpan(
+              text: words,
+              style: pw.TextStyle(font: baseFont, fontSize: 9, color: PdfColors.grey800)),
+        ]),
+      ),
+    );
+  }
+
   static Uint8List? _decodeLogo(String? base64String) {
     if (base64String == null || base64String.isEmpty) return null;
     try {

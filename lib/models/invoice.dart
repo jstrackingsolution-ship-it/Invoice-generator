@@ -60,6 +60,10 @@ class Invoice {
   String companyEmail;
   String companyPhone;
 
+  /// Taxpayer Identification Number snapshot at the time this invoice was
+  /// created (from the Company Profile), shown on the invoice/receipt.
+  String companyTin;
+
   Client client;
   List<InvoiceItem> items;
 
@@ -95,6 +99,7 @@ class Invoice {
     this.companyAddress = '',
     this.companyEmail = '',
     this.companyPhone = '',
+    this.companyTin = '',
     this.companyLogoBase64,
     Client? client,
     List<InvoiceItem>? items,
@@ -141,6 +146,7 @@ class Invoice {
         'companyAddress': companyAddress,
         'companyEmail': companyEmail,
         'companyPhone': companyPhone,
+        'companyTin': companyTin,
         'companyLogoBase64': companyLogoBase64,
         'client': client.toJson(),
         'items': items.map((e) => e.toJson()).toList(),
@@ -163,6 +169,7 @@ class Invoice {
         companyAddress: json['companyAddress'] ?? '',
         companyEmail: json['companyEmail'] ?? '',
         companyPhone: json['companyPhone'] ?? '',
+        companyTin: json['companyTin'] ?? '',
         companyLogoBase64: json['companyLogoBase64'],
         client: Client.fromJson(json['client'] ?? {}),
         items: (json['items'] as List<dynamic>? ?? [])

@@ -34,6 +34,7 @@ class Receipt {
 
   final String companyName;
   final String? companyLogoBase64;
+  final String? companyTin;
 
   final String clientName;
   final double amountPaid;
@@ -51,6 +52,7 @@ class Receipt {
     required this.invoiceNumber,
     required this.companyName,
     this.companyLogoBase64,
+    this.companyTin,
     required this.clientName,
     required this.amountPaid,
     required this.datePaid,
@@ -67,6 +69,7 @@ class Receipt {
       'invoiceNumber': invoiceNumber,
       'companyName': companyName,
       'companyLogoBase64': companyLogoBase64,
+      'companyTin': companyTin,
       'clientName': clientName,
       'amountPaid': amountPaid,
       'datePaid': datePaid.toIso8601String(),
@@ -85,6 +88,7 @@ class Receipt {
       companyName:
           json['companyName']?.toString() ?? 'SJ TRACKING SOLUTION',
       companyLogoBase64: json['companyLogoBase64']?.toString(),
+      companyTin: json['companyTin']?.toString(),
       clientName: json['clientName']?.toString() ?? '',
       amountPaid: (json['amountPaid'] as num?)?.toDouble() ?? 0.0,
       datePaid:

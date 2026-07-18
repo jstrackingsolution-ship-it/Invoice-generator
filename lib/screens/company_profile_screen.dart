@@ -21,6 +21,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   late TextEditingController _addressCtrl;
   late TextEditingController _emailCtrl;
   late TextEditingController _phoneCtrl;
+  late TextEditingController _tinCtrl;
   String? _logoBase64;
   bool _initialized = false;
 
@@ -34,6 +35,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       _addressCtrl = TextEditingController(text: profile.address);
       _emailCtrl = TextEditingController(text: profile.email);
       _phoneCtrl = TextEditingController(text: profile.phone);
+      _tinCtrl = TextEditingController(text: profile.tinNumber);
       _logoBase64 = profile.logoBase64;
       _initialized = true;
     }
@@ -72,6 +74,16 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                     controller: _phoneCtrl,
                     decoration: const InputDecoration(
                         labelText: 'Phone', border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _tinCtrl,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: 'TIN Number',
+                        hintText: 'e.g. 123-456-789',
+                        helperText: 'Taxpayer Identification Number (TRA)',
+                        border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
@@ -186,6 +198,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       address: _addressCtrl.text.trim(),
       email: _emailCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
+      tinNumber: _tinCtrl.text.trim(),
       logoBase64: _logoBase64,
     );
     await context.read<CompanyProfileProvider>().save(profile);
@@ -203,6 +216,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       _addressCtrl.dispose();
       _emailCtrl.dispose();
       _phoneCtrl.dispose();
+      _tinCtrl.dispose();
     }
     super.dispose();
   }

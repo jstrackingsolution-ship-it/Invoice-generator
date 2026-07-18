@@ -30,6 +30,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   late TextEditingController _companyAddressCtrl;
   late TextEditingController _companyEmailCtrl;
   late TextEditingController _companyPhoneCtrl;
+  late TextEditingController _companyTinCtrl;
   late TextEditingController _clientNameCtrl;
   late TextEditingController _clientEmailCtrl;
   late TextEditingController _clientPhoneCtrl;
@@ -55,6 +56,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         companyAddress: src.companyAddress,
         companyEmail: src.companyEmail,
         companyPhone: src.companyPhone,
+        companyTin: src.companyTin,
         companyLogoBase64: src.companyLogoBase64,
         client: Client(
           name: src.client.name,
@@ -85,6 +87,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         companyAddress: profile.address,
         companyEmail: profile.email,
         companyPhone: profile.phone,
+        companyTin: profile.tinNumber,
         companyLogoBase64: profile.logoBase64,
       );
     }
@@ -93,6 +96,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _companyAddressCtrl = TextEditingController(text: _invoice.companyAddress);
     _companyEmailCtrl = TextEditingController(text: _invoice.companyEmail);
     _companyPhoneCtrl = TextEditingController(text: _invoice.companyPhone);
+    _companyTinCtrl = TextEditingController(text: _invoice.companyTin);
     _clientNameCtrl = TextEditingController(text: _invoice.client.name);
     _clientEmailCtrl = TextEditingController(text: _invoice.client.email);
     _clientPhoneCtrl = TextEditingController(text: _invoice.client.phone);
@@ -109,6 +113,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _companyAddressCtrl.dispose();
     _companyEmailCtrl.dispose();
     _companyPhoneCtrl.dispose();
+    _companyTinCtrl.dispose();
     _clientNameCtrl.dispose();
     _clientEmailCtrl.dispose();
     _clientPhoneCtrl.dispose();
@@ -151,6 +156,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _invoice.companyAddress = _companyAddressCtrl.text.trim();
     _invoice.companyEmail = _companyEmailCtrl.text.trim();
     _invoice.companyPhone = _companyPhoneCtrl.text.trim();
+    _invoice.companyTin = _companyTinCtrl.text.trim();
     _invoice.client.name = _clientNameCtrl.text.trim();
     _invoice.client.email = _clientEmailCtrl.text.trim();
     _invoice.client.phone = _clientPhoneCtrl.text.trim();
@@ -237,6 +243,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
             _textField(_companyAddressCtrl, 'Address'),
             _textField(_companyEmailCtrl, 'Email'),
             _textField(_companyPhoneCtrl, 'Phone'),
+            _textField(_companyTinCtrl, 'TIN Number'),
 
             const SizedBox(height: 24),
             _sectionTitle('Bill To (Client)'),

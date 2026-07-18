@@ -66,6 +66,7 @@ class _InvoicePreviewScreenState extends State<InvoicePreviewScreen> {
       invoiceNumber: invoice.invoiceNumber,
       companyName: invoice.companyName,
       companyLogoBase64: invoice.companyLogoBase64,
+      companyTin: invoice.companyTin,
       clientName: invoice.client.name,
       amountPaid: invoice.total,
       datePaid: invoice.paidDate ?? DateTime.now(),
