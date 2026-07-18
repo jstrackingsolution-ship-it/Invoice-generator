@@ -7,9 +7,3 @@ build/
 .pub/
 *.iml
 *.lock
-android/
-ios/
-web/
-linux/
-macos/
-windows/
