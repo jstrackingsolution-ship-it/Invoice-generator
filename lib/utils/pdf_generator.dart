@@ -137,7 +137,8 @@ class InvoicePdfGenerator {
             ),
             if (showAmountInWords) ...[
               pw.SizedBox(height: 10),
-              pw.Center(
+              pw.Align(
+                alignment: pw.Alignment.centerLeft,
                 child: amountInWordsLine(receipt.amountPaid, boldFont, baseFont),
               ),
             ],
@@ -265,7 +266,8 @@ class InvoicePdfGenerator {
               0: const pw.FlexColumnWidth(4),
               1: const pw.FlexColumnWidth(1),
               2: const pw.FlexColumnWidth(1.5),
-              3: const pw.FlexColumnWidth(1.5),
+              3: const pw.FlexColumnWidth(1),
+              4: const pw.FlexColumnWidth(1.5),
             },
             children: [
               pw.TableRow(
@@ -274,6 +276,7 @@ class InvoicePdfGenerator {
                   _cell('Description', font: boldFont, header: true),
                   _cell('Qty', font: boldFont, header: true, align: pw.TextAlign.center),
                   _cell('Unit Price', font: boldFont, header: true, align: pw.TextAlign.right),
+                  _cell('Month', font: boldFont, header: true, align: pw.TextAlign.center),
                   _cell('Amount', font: boldFont, header: true, align: pw.TextAlign.right),
                 ],
               ),
@@ -282,6 +285,7 @@ class InvoicePdfGenerator {
                     _cell(item.quantity.toStringAsFixed(0),
                         align: pw.TextAlign.center),
                     _cell(Formatters.money(item.unitPrice), align: pw.TextAlign.right),
+                    _cell(item.months.toString(), align: pw.TextAlign.center),
                     _cell(Formatters.money(item.total), align: pw.TextAlign.right),
                   ])),
             ],
@@ -313,9 +317,9 @@ class InvoicePdfGenerator {
           ),
           if (showAmountInWords)
             pw.Align(
-              alignment: pw.Alignment.centerRight,
+              alignment: pw.Alignment.centerLeft,
               child: pw.SizedBox(
-                  width: 220, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
+                  width: double.infinity, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
             ),
           if (invoice.notes.isNotEmpty) ...[
             pw.SizedBox(height: 24),
@@ -448,7 +452,8 @@ class InvoicePdfGenerator {
                     0: const pw.FlexColumnWidth(4),
                     1: const pw.FlexColumnWidth(1),
                     2: const pw.FlexColumnWidth(1.5),
-                    3: const pw.FlexColumnWidth(1.5),
+                    3: const pw.FlexColumnWidth(1),
+                    4: const pw.FlexColumnWidth(1.5),
                   },
                   children: [
                     pw.TableRow(
@@ -457,6 +462,7 @@ class InvoicePdfGenerator {
                         _cell('DESCRIPTION', font: boldFont, header: true, color: PdfColors.white),
                         _cell('QTY', font: boldFont, header: true, align: pw.TextAlign.center, color: PdfColors.white),
                         _cell('PRICE', font: boldFont, header: true, align: pw.TextAlign.right, color: PdfColors.white),
+                        _cell('MONTH', font: boldFont, header: true, align: pw.TextAlign.center, color: PdfColors.white),
                         _cell('TOTAL', font: boldFont, header: true, align: pw.TextAlign.right, color: PdfColors.white),
                       ],
                     ),
@@ -471,6 +477,7 @@ class InvoicePdfGenerator {
                           _cell(item.description),
                           _cell(item.quantity.toStringAsFixed(0), align: pw.TextAlign.center),
                           _cell(Formatters.money(item.unitPrice), align: pw.TextAlign.right),
+                          _cell(item.months.toString(), align: pw.TextAlign.center),
                           _cell(Formatters.money(item.total), align: pw.TextAlign.right),
                         ],
                       );
@@ -510,9 +517,10 @@ class InvoicePdfGenerator {
                 ),
                 if (showAmountInWords)
                   pw.Align(
-                    alignment: pw.Alignment.centerRight,
+                    alignment: pw.Alignment.centerLeft,
                     child: pw.SizedBox(
-                        width: 230, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
+                        width: double.infinity,
+                        child: amountInWordsLine(invoice.total, boldFont, baseFont)),
                   ),
                 if (invoice.notes.isNotEmpty) ...[
                   pw.SizedBox(height: 20),
@@ -643,6 +651,9 @@ class InvoicePdfGenerator {
               pw.Expanded(flex: 2, child: pw.Text('PRICE',
                   textAlign: pw.TextAlign.right,
                   style: pw.TextStyle(font: boldFont, fontSize: 8, color: PdfColors.grey500, letterSpacing: 1))),
+              pw.Expanded(flex: 1, child: pw.Text('MONTH',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(font: boldFont, fontSize: 8, color: PdfColors.grey500, letterSpacing: 1))),
               pw.Expanded(flex: 2, child: pw.Text('AMOUNT',
                   textAlign: pw.TextAlign.right,
                   style: pw.TextStyle(font: boldFont, fontSize: 8, color: PdfColors.grey500, letterSpacing: 1))),
@@ -661,6 +672,8 @@ class InvoicePdfGenerator {
                             textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10))),
                         pw.Expanded(flex: 2, child: pw.Text(Formatters.money(item.unitPrice),
                             textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 10))),
+                        pw.Expanded(flex: 1, child: pw.Text(item.months.toString(),
+                            textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 10))),
                         pw.Expanded(flex: 2, child: pw.Text(Formatters.money(item.total),
                             textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 10))),
                       ],
@@ -693,9 +706,9 @@ class InvoicePdfGenerator {
           ),
           if (showAmountInWords)
             pw.Align(
-              alignment: pw.Alignment.centerRight,
+              alignment: pw.Alignment.centerLeft,
               child: pw.SizedBox(
-                  width: 200, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
+                  width: double.infinity, child: amountInWordsLine(invoice.total, boldFont, baseFont)),
             ),
           if (invoice.notes.isNotEmpty) ...[
             pw.SizedBox(height: 28),

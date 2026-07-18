@@ -66,7 +66,10 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         ),
         items: src.items
             .map((i) => InvoiceItem(
-                description: i.description, quantity: i.quantity, unitPrice: i.unitPrice))
+                description: i.description,
+                quantity: i.quantity,
+                unitPrice: i.unitPrice,
+                months: i.months))
             .toList(),
         issueDate: src.issueDate,
         dueDate: src.dueDate,
@@ -456,6 +459,15 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
                     decoration: const InputDecoration(labelText: 'Unit Price', border: OutlineInputBorder()),
                     onChanged: (v) => setState(() => item.unitPrice = double.tryParse(v) ?? 0),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextFormField(
+                    initialValue: item.months.toString(),
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(labelText: 'Month(s)', border: OutlineInputBorder()),
+                    onChanged: (v) => setState(() => item.months = int.tryParse(v) ?? 1),
                   ),
                 ),
                 IconButton(
