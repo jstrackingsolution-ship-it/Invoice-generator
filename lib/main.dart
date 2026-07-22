@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/ai_settings_provider.dart';
+import 'providers/auth_provider.dart';
 import 'providers/company_profile_provider.dart';
 import 'providers/invoice_provider.dart';
 import 'providers/receipt_provider.dart';
 import 'screens/home_screen.dart';
+import 'screens/login_screen.dart';
 
 void main() {
   runApp(const SjTrackingSolutionApp());
@@ -20,6 +22,7 @@ class SjTrackingSolutionApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => InvoiceProvider()),
         ChangeNotifierProvider(create: (_) => CompanyProfileProvider()),
         ChangeNotifierProvider(create: (_) => ReceiptProvider()),
@@ -47,8 +50,27 @@ class SjTrackingSolutionApp extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        home: const HomeScreen(),
+        home: const AuthGate(),
       ),
     );
   }
 }
+
+/// Shows the login screen until the user is authenticated, then shows the
+/// app's home screen. Also waits for the persisted session to be restored
+/// before deciding which screen to show, to avoid a login-screen flash.
+class AuthGate extends StatelessWidget {
+  const AuthGate({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = context.watch<AuthProvider>();
+
+    if (auth.isLoading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return auth.isLoggedIn ? const HomeScreen() : const LoginScreen();
+  }
+}
+

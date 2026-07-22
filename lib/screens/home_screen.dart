@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/invoice.dart';
+import '../providers/auth_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../utils/formatters.dart';
 import '../utils/month_utils.dart';
@@ -10,6 +11,7 @@ import 'company_profile_screen.dart';
 import 'invoice_form_screen.dart';
 import 'invoice_preview_screen.dart';
 import 'receipts_screen.dart';
+import 'user_management_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,9 +36,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _confirmLogout(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await context.read<AuthProvider>().logout();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<InvoiceProvider>();
+    final isAdmin = context.watch<AuthProvider>().currentUserIsAdmin;
 
     return Scaffold(
       appBar: AppBar(
@@ -63,6 +89,23 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const CompanyProfileScreen()),
             ),
+          ),
+          if (isAdmin)
+            IconButton(
+              tooltip: 'Manage Users',
+              icon: Badge(
+                label: Text('${context.watch<AuthProvider>().pendingUsers.length}'),
+                isLabelVisible: context.watch<AuthProvider>().pendingUsers.isNotEmpty,
+                child: const Icon(Icons.admin_panel_settings),
+              ),
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const UserManagementScreen()),
+              ),
+            ),
+          IconButton(
+            tooltip: 'Logout',
+            icon: const Icon(Icons.logout),
+            onPressed: () => _confirmLogout(context),
           ),
         ],
       ),

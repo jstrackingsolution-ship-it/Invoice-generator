@@ -22,6 +22,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
   late TextEditingController _emailCtrl;
   late TextEditingController _phoneCtrl;
   late TextEditingController _tinCtrl;
+  late TextEditingController _vrnCtrl;
   String? _logoBase64;
   bool _initialized = false;
 
@@ -36,6 +37,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       _emailCtrl = TextEditingController(text: profile.email);
       _phoneCtrl = TextEditingController(text: profile.phone);
       _tinCtrl = TextEditingController(text: profile.tinNumber);
+      _vrnCtrl = TextEditingController(text: profile.vrnNumber);
       _logoBase64 = profile.logoBase64;
       _initialized = true;
     }
@@ -83,6 +85,15 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
                         labelText: 'TIN Number',
                         hintText: 'e.g. 123-456-789',
                         helperText: 'Taxpayer Identification Number (TRA)',
+                        border: OutlineInputBorder()),
+                  ),
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: _vrnCtrl,
+                    decoration: const InputDecoration(
+                        labelText: 'VRN Number',
+                        hintText: 'e.g. 40-123456-A',
+                        helperText: 'VAT Registration Number',
                         border: OutlineInputBorder()),
                   ),
                   const SizedBox(height: 24),
@@ -199,6 +210,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       email: _emailCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
       tinNumber: _tinCtrl.text.trim(),
+      vrnNumber: _vrnCtrl.text.trim(),
       logoBase64: _logoBase64,
     );
     await context.read<CompanyProfileProvider>().save(profile);
@@ -217,6 +229,7 @@ class _CompanyProfileScreenState extends State<CompanyProfileScreen> {
       _emailCtrl.dispose();
       _phoneCtrl.dispose();
       _tinCtrl.dispose();
+      _vrnCtrl.dispose();
     }
     super.dispose();
   }

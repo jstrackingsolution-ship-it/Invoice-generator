@@ -31,10 +31,13 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
   late TextEditingController _companyEmailCtrl;
   late TextEditingController _companyPhoneCtrl;
   late TextEditingController _companyTinCtrl;
+  late TextEditingController _companyVrnCtrl;
   late TextEditingController _clientNameCtrl;
   late TextEditingController _clientEmailCtrl;
   late TextEditingController _clientPhoneCtrl;
   late TextEditingController _clientAddressCtrl;
+  late TextEditingController _clientVrnCtrl;
+  late TextEditingController _clientTinCtrl;
   late TextEditingController _notesCtrl;
   late TextEditingController _taxCtrl;
   late TextEditingController _discountCtrl;
@@ -57,12 +60,15 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         companyEmail: src.companyEmail,
         companyPhone: src.companyPhone,
         companyTin: src.companyTin,
+        companyVrn: src.companyVrn,
         companyLogoBase64: src.companyLogoBase64,
         client: Client(
           name: src.client.name,
           email: src.client.email,
           phone: src.client.phone,
           address: src.client.address,
+          vrn: src.client.vrn,
+          tin: src.client.tin,
         ),
         items: src.items
             .map((i) => InvoiceItem(
@@ -91,6 +97,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
         companyEmail: profile.email,
         companyPhone: profile.phone,
         companyTin: profile.tinNumber,
+        companyVrn: profile.vrnNumber,
         companyLogoBase64: profile.logoBase64,
       );
     }
@@ -100,10 +107,13 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _companyEmailCtrl = TextEditingController(text: _invoice.companyEmail);
     _companyPhoneCtrl = TextEditingController(text: _invoice.companyPhone);
     _companyTinCtrl = TextEditingController(text: _invoice.companyTin);
+    _companyVrnCtrl = TextEditingController(text: _invoice.companyVrn);
     _clientNameCtrl = TextEditingController(text: _invoice.client.name);
     _clientEmailCtrl = TextEditingController(text: _invoice.client.email);
     _clientPhoneCtrl = TextEditingController(text: _invoice.client.phone);
     _clientAddressCtrl = TextEditingController(text: _invoice.client.address);
+    _clientVrnCtrl = TextEditingController(text: _invoice.client.vrn);
+    _clientTinCtrl = TextEditingController(text: _invoice.client.tin);
     _notesCtrl = TextEditingController(text: _invoice.notes);
     _taxCtrl = TextEditingController(text: _invoice.taxRate == 0 ? '' : _invoice.taxRate.toString());
     _discountCtrl =
@@ -117,10 +127,13 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _companyEmailCtrl.dispose();
     _companyPhoneCtrl.dispose();
     _companyTinCtrl.dispose();
+    _companyVrnCtrl.dispose();
     _clientNameCtrl.dispose();
     _clientEmailCtrl.dispose();
     _clientPhoneCtrl.dispose();
     _clientAddressCtrl.dispose();
+    _clientVrnCtrl.dispose();
+    _clientTinCtrl.dispose();
     _notesCtrl.dispose();
     _taxCtrl.dispose();
     _discountCtrl.dispose();
@@ -160,10 +173,13 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
     _invoice.companyEmail = _companyEmailCtrl.text.trim();
     _invoice.companyPhone = _companyPhoneCtrl.text.trim();
     _invoice.companyTin = _companyTinCtrl.text.trim();
+    _invoice.companyVrn = _companyVrnCtrl.text.trim();
     _invoice.client.name = _clientNameCtrl.text.trim();
     _invoice.client.email = _clientEmailCtrl.text.trim();
     _invoice.client.phone = _clientPhoneCtrl.text.trim();
     _invoice.client.address = _clientAddressCtrl.text.trim();
+    _invoice.client.vrn = _clientVrnCtrl.text.trim();
+    _invoice.client.tin = _clientTinCtrl.text.trim();
     _invoice.notes = _notesCtrl.text.trim();
     _invoice.taxRate = double.tryParse(_taxCtrl.text.trim()) ?? 0;
     _invoice.discount = double.tryParse(_discountCtrl.text.trim()) ?? 0;
@@ -247,6 +263,7 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
             _textField(_companyEmailCtrl, 'Email'),
             _textField(_companyPhoneCtrl, 'Phone'),
             _textField(_companyTinCtrl, 'TIN Number'),
+            _textField(_companyVrnCtrl, 'VRN Number'),
 
             const SizedBox(height: 24),
             _sectionTitle('Bill To (Client)'),
@@ -254,6 +271,8 @@ class _InvoiceFormScreenState extends State<InvoiceFormScreen> {
             _textField(_clientAddressCtrl, 'Address'),
             _textField(_clientEmailCtrl, 'Email'),
             _textField(_clientPhoneCtrl, 'Phone'),
+            _textField(_clientVrnCtrl, 'VRN Number'),
+            _textField(_clientTinCtrl, 'TIN Number'),
 
             const SizedBox(height: 24),
             _sectionTitle('Line Items'),

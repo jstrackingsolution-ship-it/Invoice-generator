@@ -64,6 +64,10 @@ class Invoice {
   /// created (from the Company Profile), shown on the invoice/receipt.
   String companyTin;
 
+  /// VAT Registration Number snapshot at the time this invoice was
+  /// created (from the Company Profile), shown on the invoice/receipt.
+  String companyVrn;
+
   Client client;
   List<InvoiceItem> items;
 
@@ -100,6 +104,7 @@ class Invoice {
     this.companyEmail = '',
     this.companyPhone = '',
     this.companyTin = '',
+    this.companyVrn = '',
     this.companyLogoBase64,
     Client? client,
     List<InvoiceItem>? items,
@@ -147,6 +152,7 @@ class Invoice {
         'companyEmail': companyEmail,
         'companyPhone': companyPhone,
         'companyTin': companyTin,
+        'companyVrn': companyVrn,
         'companyLogoBase64': companyLogoBase64,
         'client': client.toJson(),
         'items': items.map((e) => e.toJson()).toList(),
@@ -170,6 +176,7 @@ class Invoice {
         companyEmail: json['companyEmail'] ?? '',
         companyPhone: json['companyPhone'] ?? '',
         companyTin: json['companyTin'] ?? '',
+        companyVrn: json['companyVrn'] ?? '',
         companyLogoBase64: json['companyLogoBase64'],
         client: Client.fromJson(json['client'] ?? {}),
         items: (json['items'] as List<dynamic>? ?? [])

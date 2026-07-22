@@ -66,6 +66,9 @@ class InvoicePdfGenerator {
                       if (receipt.companyTin != null && receipt.companyTin!.isNotEmpty)
                         pw.Text('TIN: ${receipt.companyTin}',
                             style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
+                      if (receipt.companyVrn != null && receipt.companyVrn!.isNotEmpty)
+                        pw.Text('VRN: ${receipt.companyVrn}',
+                            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
                     ],
                   ),
                 ]),
@@ -219,6 +222,8 @@ class InvoicePdfGenerator {
                       pw.Text(invoice.companyPhone),
                     if (invoice.companyTin.isNotEmpty)
                       pw.Text('TIN: ${invoice.companyTin}'),
+                    if (invoice.companyVrn.isNotEmpty)
+                      pw.Text('VRN: ${invoice.companyVrn}'),
                   ],
                 ),
               ),
@@ -235,6 +240,10 @@ class InvoicePdfGenerator {
                       pw.Text(invoice.client.email),
                     if (invoice.client.phone.isNotEmpty)
                       pw.Text(invoice.client.phone),
+                    if (invoice.client.vrn.isNotEmpty)
+                      pw.Text('VRN: ${invoice.client.vrn}'),
+                    if (invoice.client.tin.isNotEmpty)
+                      pw.Text('TIN: ${invoice.client.tin}'),
                   ],
                 ),
               ),
@@ -385,6 +394,9 @@ class InvoicePdfGenerator {
                       if (invoice.companyTin.isNotEmpty)
                         pw.Text('TIN: ${invoice.companyTin}',
                             style: const pw.TextStyle(color: PdfColors.white, fontSize: 9)),
+                      if (invoice.companyVrn.isNotEmpty)
+                        pw.Text('VRN: ${invoice.companyVrn}',
+                            style: const pw.TextStyle(color: PdfColors.white, fontSize: 9)),
                     ],
                   ),
                 ],
@@ -426,6 +438,10 @@ class InvoicePdfGenerator {
                           pw.Text(invoice.client.address, style: const pw.TextStyle(fontSize: 10)),
                         if (invoice.client.email.isNotEmpty)
                           pw.Text(invoice.client.email, style: const pw.TextStyle(fontSize: 10)),
+                        if (invoice.client.vrn.isNotEmpty)
+                          pw.Text('VRN: ${invoice.client.vrn}', style: const pw.TextStyle(fontSize: 10)),
+                        if (invoice.client.tin.isNotEmpty)
+                          pw.Text('TIN: ${invoice.client.tin}', style: const pw.TextStyle(fontSize: 10)),
                       ],
                     ),
                     pw.Column(
@@ -568,6 +584,12 @@ class InvoicePdfGenerator {
               child: pw.Text('TIN: ${invoice.companyTin}',
                   style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
             ),
+          if (invoice.companyVrn.isNotEmpty)
+            pw.Padding(
+              padding: const pw.EdgeInsets.only(top: 2),
+              child: pw.Text('VRN: ${invoice.companyVrn}',
+                  style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey500)),
+            ),
           pw.SizedBox(height: 30),
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -603,6 +625,10 @@ class InvoicePdfGenerator {
                       pw.Text(invoice.client.address, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                     if (invoice.client.email.isNotEmpty)
                       pw.Text(invoice.client.email, style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                    if (invoice.client.vrn.isNotEmpty)
+                      pw.Text('VRN: ${invoice.client.vrn}', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
+                    if (invoice.client.tin.isNotEmpty)
+                      pw.Text('TIN: ${invoice.client.tin}', style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey700)),
                   ],
                 ),
               ),

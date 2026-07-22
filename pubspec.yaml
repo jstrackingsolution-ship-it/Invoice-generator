@@ -27,6 +27,9 @@ dependencies:
   # Unique IDs for invoices/items
   uuid: ^4.4.0
 
+  # Password hashing for user accounts
+  crypto: ^3.0.3
+
   # Company logo upload (gallery/camera picker)
   image_picker: ^1.1.2
 

@@ -7,6 +7,9 @@ class CompanyProfile {
   /// Tanzania Revenue Authority Taxpayer Identification Number.
   String tinNumber;
 
+  /// VAT Registration Number.
+  String vrnNumber;
+
   /// Base64-encoded logo image bytes (PNG/JPEG), or null if none uploaded.
   String? logoBase64;
 
@@ -16,6 +19,7 @@ class CompanyProfile {
     this.email = '',
     this.phone = '',
     this.tinNumber = '',
+    this.vrnNumber = '',
     this.logoBase64,
   });
 
@@ -27,6 +31,7 @@ class CompanyProfile {
         'email': email,
         'phone': phone,
         'tinNumber': tinNumber,
+        'vrnNumber': vrnNumber,
         'logoBase64': logoBase64,
       };
 
@@ -36,6 +41,7 @@ class CompanyProfile {
         email: json['email'] ?? '',
         phone: json['phone'] ?? '',
         tinNumber: json['tinNumber'] ?? '',
+        vrnNumber: json['vrnNumber'] ?? '',
         logoBase64: json['logoBase64'],
       );
 }
