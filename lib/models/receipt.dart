@@ -1,5 +1,5 @@
 import 'package:uuid/uuid.dart';
-import '../models/receipt.dart';
+import 'invoice_item.dart';
 
 enum PaymentMethod {
   cash,
@@ -38,9 +38,19 @@ class Receipt {
   final String? companyVrn;
 
   final String clientName;
+  final String? clientTin;
+  final String? clientVrn;
   final double amountPaid;
   final DateTime datePaid;
   final PaymentMethod method;
+
+  /// Snapshot of the invoice's line items and tax breakdown, so the receipt
+  /// can show an itemized "Purchased Items" section independent of any
+  /// later edits to the original invoice.
+  final List<InvoiceItem> items;
+  final double subtotal;
+  final double taxRate;
+  final double taxAmount;
 
   /// Only used for GPS service invoices
   final int? monthsPaid;
@@ -56,12 +66,19 @@ class Receipt {
     this.companyTin,
     this.companyVrn,
     required this.clientName,
+    this.clientTin,
+    this.clientVrn,
     required this.amountPaid,
     required this.datePaid,
     this.method = PaymentMethod.cash,
+    List<InvoiceItem>? items,
+    this.subtotal = 0,
+    this.taxRate = 0,
+    this.taxAmount = 0,
     this.monthsPaid,
     this.serviceExpiry,
-  }) : id = id ?? const Uuid().v4();
+  })  : items = items ?? const [],
+        id = id ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() {
     return {
@@ -74,9 +91,15 @@ class Receipt {
       'companyTin': companyTin,
       'companyVrn': companyVrn,
       'clientName': clientName,
+      'clientTin': clientTin,
+      'clientVrn': clientVrn,
       'amountPaid': amountPaid,
       'datePaid': datePaid.toIso8601String(),
       'method': method.name,
+      'items': items.map((i) => i.toJson()).toList(),
+      'subtotal': subtotal,
+      'taxRate': taxRate,
+      'taxAmount': taxAmount,
       'monthsPaid': monthsPaid,
       'serviceExpiry': serviceExpiry?.toIso8601String(),
     };
@@ -94,6 +117,8 @@ class Receipt {
       companyTin: json['companyTin']?.toString(),
       companyVrn: json['companyVrn']?.toString(),
       clientName: json['clientName']?.toString() ?? '',
+      clientTin: json['clientTin']?.toString(),
+      clientVrn: json['clientVrn']?.toString(),
       amountPaid: (json['amountPaid'] as num?)?.toDouble() ?? 0.0,
       datePaid:
           DateTime.tryParse(json['datePaid']?.toString() ?? '') ??
@@ -102,6 +127,12 @@ class Receipt {
         (e) => e.name == json['method'],
         orElse: () => PaymentMethod.cash,
       ),
+      items: ((json['items'] as List<dynamic>?) ?? [])
+          .map((e) => InvoiceItem.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
+      taxRate: (json['taxRate'] as num?)?.toDouble() ?? 0.0,
+      taxAmount: (json['taxAmount'] as num?)?.toDouble() ?? 0.0,
       monthsPaid: json['monthsPaid'] as int?,
       serviceExpiry: json['serviceExpiry'] != null
           ? DateTime.tryParse(json['serviceExpiry'].toString())

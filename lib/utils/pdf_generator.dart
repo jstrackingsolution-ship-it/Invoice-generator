@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:barcode/barcode.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -34,125 +35,158 @@ class InvoicePdfGenerator {
     return doc.save();
   }
 
-  /// Builds a clean payment receipt PDF for a [Receipt], stamped PAID.
+  /// Builds a compact, thermal-receipt-style payment receipt PDF for a
+  /// [Receipt], with an itemized breakdown and tax summary. This is styled
+  /// as the company's own payment receipt — it does not claim to be a
+  /// government-certified fiscal (EFD) receipt, and includes no fiscal
+  /// device serial/UIN, Z-number, or verification QR code.
   static Future<Uint8List> generateReceipt(
     Receipt receipt, {
     bool showAmountInWords = true,
   }) async {
     final doc = pw.Document();
-    const accent = PdfColor.fromInt(0xFF1B8A5A); // green, distinct from invoice accent
-    final baseFont = pw.Font.helvetica();
-    final boldFont = pw.Font.helveticaBold();
-    final logo = _logoImage(receipt.companyLogoBase64, size: 44);
+    const accent = PdfColor.fromInt(0xFF1B8A5A);
+    final baseFont = pw.Font.courier();
+    final boldFont = pw.Font.courierBold();
+    final logo = _logoImage(receipt.companyLogoBase64, size: 40);
+
+    // Narrow, thermal-receipt-proportioned page that grows to fit content.
+    const pageWidth = 226.0; // ~80mm
+    final format = PdfPageFormat(pageWidth, double.infinity,
+        marginLeft: 14, marginRight: 14, marginTop: 16, marginBottom: 16);
+
+    pw.Widget divider() => pw.Container(
+          width: double.infinity,
+          margin: const pw.EdgeInsets.symmetric(vertical: 6),
+          child: pw.Text('- - - - - - - - - - - - - - - - - - - -',
+              style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey600)),
+        );
+
+    pw.Widget centered(String text, {double size = 9, pw.Font? font, PdfColor? color}) => pw.Center(
+          child: pw.Text(text,
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(font: font ?? baseFont, fontSize: size, color: color)),
+        );
+
+    pw.Widget row(String label, String value, {bool boldValue = true}) => pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(vertical: 1),
+          child: pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text(label, style: const pw.TextStyle(fontSize: 8, color: PdfColors.grey700)),
+              pw.Text(value,
+                  style: pw.TextStyle(font: boldValue ? boldFont : baseFont, fontSize: 8)),
+            ],
+          ),
+        );
 
     doc.addPage(
       pw.Page(
+        pageFormat: format,
         theme: pw.ThemeData.withFont(base: baseFont, bold: boldFont),
-        margin: const pw.EdgeInsets.all(40),
         build: (context) => pw.Column(
-          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
           children: [
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: pw.CrossAxisAlignment.center,
-              children: [
-                pw.Row(children: [
-                  if (logo != null) ...[logo, pw.SizedBox(width: 10)],
-                  pw.Column(
-                    crossAxisAlignment: pw.CrossAxisAlignment.start,
-                    children: [
-                      pw.Text(receipt.companyName,
-                          style: pw.TextStyle(font: boldFont, fontSize: 18)),
-                      if (receipt.companyTin != null && receipt.companyTin!.isNotEmpty)
-                        pw.Text('TIN: ${receipt.companyTin}',
-                            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
-                      if (receipt.companyVrn != null && receipt.companyVrn!.isNotEmpty)
-                        pw.Text('VRN: ${receipt.companyVrn}',
-                            style: const pw.TextStyle(fontSize: 9, color: PdfColors.grey600)),
-                    ],
-                  ),
-                ]),
-                pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                  decoration: pw.BoxDecoration(
-                    color: accent,
-                    borderRadius: pw.BorderRadius.circular(4),
-                  ),
-                  child: pw.Text('PAID',
-                      style: pw.TextStyle(
-                          font: boldFont, fontSize: 14, color: PdfColors.white, letterSpacing: 2)),
-                ),
-              ],
-            ),
+            if (logo != null) pw.Center(child: logo),
+            if (logo != null) pw.SizedBox(height: 6),
+            centered(receipt.companyName, size: 12, font: boldFont),
+            if (receipt.companyTin != null && receipt.companyTin!.isNotEmpty)
+              centered('TIN: ${receipt.companyTin}', size: 8, color: PdfColors.grey700),
+            if (receipt.companyVrn != null && receipt.companyVrn!.isNotEmpty)
+              centered('VRN: ${receipt.companyVrn}', size: 8, color: PdfColors.grey700),
+            divider(),
+            centered('PAYMENT RECEIPT', size: 11, font: boldFont, color: accent),
             pw.SizedBox(height: 6),
-            pw.Divider(thickness: 1, color: PdfColors.grey400),
-            pw.SizedBox(height: 20),
-            pw.Text('Payment Receipt',
-                style: pw.TextStyle(font: boldFont, fontSize: 22, color: accent)),
-            pw.SizedBox(height: 16),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-              children: [
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.start,
-                  children: [
-                    _kv('Receipt No', receipt.receiptNumber, boldFont),
-                    _kv('Invoice No', receipt.invoiceNumber, boldFont),
-                    _kv('Received From', receipt.clientName, boldFont),
-                  ],
-                ),
-                pw.Column(
-                  crossAxisAlignment: pw.CrossAxisAlignment.end,
-                  children: [
-                    _kv('Date Paid', Formatters.date(receipt.datePaid), boldFont),
-                    _kv('Method', receipt.method.label, boldFont),
-                  ],
-                ),
-              ],
-            ),
-            if (receipt.monthsPaid != null && receipt.serviceExpiry != null) ...[
-              gpsServiceBox(
-                monthsPaid: receipt.monthsPaid!,
-                expiry: receipt.serviceExpiry!,
-                boldFont: boldFont,
-                baseFont: baseFont,
-                accent: accent,
+            row('Receipt No:', receipt.receiptNumber),
+            row('Invoice No:', receipt.invoiceNumber),
+            row('Date:', Formatters.date(receipt.datePaid)),
+            row('Time:',
+                '${receipt.datePaid.hour.toString().padLeft(2, '0')}:${receipt.datePaid.minute.toString().padLeft(2, '0')}'),
+            row('Payment Method:', receipt.method.label),
+            divider(),
+            pw.Text('CUSTOMER', style: pw.TextStyle(font: boldFont, fontSize: 8, color: PdfColors.grey700)),
+            pw.SizedBox(height: 2),
+            row('Name:', receipt.clientName),
+            if (receipt.clientTin != null && receipt.clientTin!.isNotEmpty) row('TIN:', receipt.clientTin!),
+            if (receipt.clientVrn != null && receipt.clientVrn!.isNotEmpty) row('VRN:', receipt.clientVrn!),
+            divider(),
+            if (receipt.items.isNotEmpty) ...[
+              pw.Text('PURCHASED ITEMS',
+                  style: pw.TextStyle(font: boldFont, fontSize: 8, color: PdfColors.grey700)),
+              pw.SizedBox(height: 4),
+              pw.Row(
+                children: [
+                  pw.Expanded(flex: 5, child: pw.Text('Description', style: pw.TextStyle(font: boldFont, fontSize: 7.5))),
+                  pw.Expanded(flex: 2, child: pw.Text('Qty', textAlign: pw.TextAlign.center, style: pw.TextStyle(font: boldFont, fontSize: 7.5))),
+                  pw.Expanded(flex: 3, child: pw.Text('Price', textAlign: pw.TextAlign.right, style: pw.TextStyle(font: boldFont, fontSize: 7.5))),
+                ],
               ),
+              pw.SizedBox(height: 2),
+              for (final item in receipt.items) ...[
+                pw.Row(
+                  children: [
+                    pw.Expanded(flex: 5, child: pw.Text(item.description, style: const pw.TextStyle(fontSize: 7.5))),
+                    pw.Expanded(
+                        flex: 2,
+                        child: pw.Text(item.quantity.toStringAsFixed(item.quantity.truncateToDouble() == item.quantity ? 0 : 2),
+                            textAlign: pw.TextAlign.center, style: const pw.TextStyle(fontSize: 7.5))),
+                    pw.Expanded(
+                        flex: 3,
+                        child: pw.Text(Formatters.money(item.total),
+                            textAlign: pw.TextAlign.right, style: const pw.TextStyle(fontSize: 7.5))),
+                  ],
+                ),
+                pw.SizedBox(height: 2),
+              ],
+              divider(),
+              row('TOTAL EXCL. OF TAX:', Formatters.money(receipt.subtotal)),
+              row('TAX (${receipt.taxRate.toStringAsFixed(0)}%):', Formatters.money(receipt.taxAmount)),
+              row('TOTAL INCL. OF TAX:', Formatters.money(receipt.amountPaid)),
+              divider(),
             ],
-            pw.SizedBox(height: 20),
+            if (receipt.monthsPaid != null && receipt.serviceExpiry != null) ...[
+              pw.SizedBox(height: 4),
+              pw.Text('GPS Service: ${receipt.monthsPaid} month(s) — valid until ${Formatters.date(receipt.serviceExpiry!)}',
+                  style: const pw.TextStyle(fontSize: 7.5, color: PdfColors.grey700)),
+              pw.SizedBox(height: 6),
+            ],
             pw.Container(
               width: double.infinity,
-              padding: const pw.EdgeInsets.all(18),
-              decoration: pw.BoxDecoration(
-                color: PdfColors.grey100,
-                borderRadius: pw.BorderRadius.circular(8),
-              ),
+              padding: const pw.EdgeInsets.symmetric(vertical: 10),
+              decoration: const pw.BoxDecoration(color: PdfColors.grey100),
               child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.center,
                 children: [
-                  pw.Text('AMOUNT PAID',
-                      style: pw.TextStyle(font: boldFont, fontSize: 10, color: PdfColors.grey600)),
-                  pw.SizedBox(height: 4),
+                  pw.Text('AMOUNT PAID', style: pw.TextStyle(font: boldFont, fontSize: 8, color: PdfColors.grey600)),
+                  pw.SizedBox(height: 2),
                   pw.Text(Formatters.money(receipt.amountPaid),
-                      style: pw.TextStyle(font: boldFont, fontSize: 26, color: accent)),
+                      style: pw.TextStyle(font: boldFont, fontSize: 16, color: accent)),
                 ],
               ),
             ),
             if (showAmountInWords) ...[
-              pw.SizedBox(height: 10),
-              pw.Align(
-                alignment: pw.Alignment.centerLeft,
-                child: amountInWordsLine(receipt.amountPaid, boldFont, baseFont),
-              ),
+              pw.SizedBox(height: 6),
+              pw.Center(child: amountInWordsLine(receipt.amountPaid, boldFont, baseFont, fontSize: 7)),
             ],
-            pw.SizedBox(height: 30),
-            pw.Text(
-              'This receipt confirms that the above payment has been received in full.',
-              style: const pw.TextStyle(fontSize: 10, color: PdfColors.grey700),
+            pw.SizedBox(height: 10),
+            pw.Center(
+              child: pw.BarcodeWidget(
+                barcode: Barcode.qrCode(),
+                data: 'Receipt: ${receipt.receiptNumber}\n'
+                    'Invoice: ${receipt.invoiceNumber}\n'
+                    'From: ${receipt.companyName}\n'
+                    'To: ${receipt.clientName}\n'
+                    'Amount: ${Formatters.money(receipt.amountPaid)}\n'
+                    'Date: ${Formatters.date(receipt.datePaid)}',
+                width: 64,
+                height: 64,
+              ),
             ),
-            pw.SizedBox(height: 6),
-            pw.Text('Thank you for your business.',
-                style: pw.TextStyle(font: boldFont, fontSize: 10, color: accent)),
+            pw.SizedBox(height: 4),
+            centered('Scan to save these receipt details', size: 7, color: PdfColors.grey600),
+            pw.SizedBox(height: 8),
+            centered('This receipt confirms payment received in full.', size: 7.5, color: PdfColors.grey700),
+            pw.SizedBox(height: 4),
+            centered('Thank you for your business.', size: 8, font: boldFont, color: accent),
           ],
         ),
       ),
@@ -751,7 +785,7 @@ class InvoicePdfGenerator {
   // ---------------------------------------------------------------------
   // Logo + GPS Service Charge helpers (shared across templates)
   // ---------------------------------------------------------------------
-  static pw.Widget amountInWordsLine(double amount, pw.Font boldFont, pw.Font baseFont) {
+  static pw.Widget amountInWordsLine(double amount, pw.Font boldFont, pw.Font baseFont, {double fontSize = 9}) {
     final words = amountInWords(amount, currencySymbol: Formatters.currencySymbol);
     return pw.Container(
       margin: const pw.EdgeInsets.only(top: 8),
@@ -759,10 +793,10 @@ class InvoicePdfGenerator {
         text: pw.TextSpan(children: [
           pw.TextSpan(
               text: 'Amount in words: ',
-              style: pw.TextStyle(font: boldFont, fontSize: 9, color: PdfColors.grey700)),
+              style: pw.TextStyle(font: boldFont, fontSize: fontSize, color: PdfColors.grey700)),
           pw.TextSpan(
               text: words,
-              style: pw.TextStyle(font: baseFont, fontSize: 9, color: PdfColors.grey800)),
+              style: pw.TextStyle(font: baseFont, fontSize: fontSize, color: PdfColors.grey800)),
         ]),
       ),
     );
